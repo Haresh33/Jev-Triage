@@ -55,6 +55,10 @@ unresolved ("not stated") evidence, and the decision trail.
 
 ![Decision trail](docs/screenshots/05-decision-trail.png)
 
+**Coverage, guardrail and follow-up** — per-indicator questions, which sources were unavailable, the benign-closure guardrail, and the box to `/ask` Jev a question or add a `/note` and rerun.
+
+![Coverage, guardrail and follow-up](docs/screenshots/06-guardrail-and-ask.png)
+
 ## Layout
 
 - `server/src/` — triage engine (`triage.ts`), behaviour analyser (`behavior.ts`),
