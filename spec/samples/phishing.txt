@@ -1,0 +1,6 @@
+Reported phishing email - user clicked
+From: "IT Helpdesk" <support@micros0ft-secure-login[.]com>
+To: m.chen@yourcompany.com
+Subject: Password expires today - action required
+Link in body: hxxps://micros0ft-secure-login[.]com/owa/auth/login.php?user=m.chen
+User m.chen clicked the link at 09:14 from 10.1.3.77 and a sign-in from 45.155.205.233 followed at 09:21.

@@ -1,0 +1,93 @@
+name: Jev alert triage
+
+on:
+  issues:
+    types: [opened, reopened, labeled]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      alert:
+        description: "Alert to triage (JSON or text)"
+        required: true
+        type: string
+      question:
+        description: "Optional question for Jev (yes/no, or 'Which stage? [blocked | executed | spreading]')"
+        required: false
+        type: string
+      note:
+        description: "Optional context for Jev"
+        required: false
+        type: string
+  repository_dispatch:
+    types: [alert]   # POST /repos/OWNER/REPO/dispatches {"event_type":"alert","client_payload":{"alert":{...}}}
+
+permissions:
+  contents: read
+  issues: write
+
+# One run per issue at a time. A newer /ask, /note or /triage replaces a run still in progress,
+# and the "opened" + "labeled" pair GitHub sends for a new form issue collapses into one run.
+concurrency:
+  group: jev-triage-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    # Only repo members / collaborators can trigger a run (protects your API keys and quota).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'repository_dispatch' ||
+      (github.event_name == 'issues' &&
+        contains(github.event.issue.labels.*.name, 'alert') &&
+        (github.event.action != 'labeled' || github.event.label.name == 'alert') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association)) ||
+      (github.event_name == 'issue_comment' && !github.event.issue.pull_request &&
+        contains(github.event.issue.labels.*.name, 'alert') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+        (startsWith(github.event.comment.body, '/triage') ||
+         startsWith(github.event.comment.body, '/ask') ||
+         startsWith(github.event.comment.body, '/note')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Triage with Jev
+        id: triage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # --- secrets (Settings -> Secrets and variables -> Actions -> Secrets)
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          VT_API_KEY: ${{ secrets.VT_API_KEY }}
+          ABUSECH_AUTH_KEY: ${{ secrets.ABUSECH_AUTH_KEY }}
+          ABUSEIPDB_API_KEY: ${{ secrets.ABUSEIPDB_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # --- optional tuning (Settings -> Secrets and variables -> Actions -> Variables); blank = default
+          JEV_MODEL: ${{ vars.JEV_MODEL }}
+          MALICIOUS_AT: ${{ vars.MALICIOUS_AT }}
+          BENIGN_AT: ${{ vars.BENIGN_AT }}
+          MAX_ROUNDS: ${{ vars.MAX_ROUNDS }}
+          TIEBREAKER: ${{ vars.TIEBREAKER }}
+          CLAUDE_QUESTIONS: ${{ vars.CLAUDE_QUESTIONS }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          ALLOWLIST_DOMAINS: ${{ vars.ALLOWLIST_DOMAINS }}
+          VT_RPM: ${{ vars.VT_RPM }}
+        run: python -m triage.gha
+
+      - name: Keep the full result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triage-result-${{ github.run_id }}
+          path: triage-result.json
+          if-no-files-found: ignore
+          retention-days: 30

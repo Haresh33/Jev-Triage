@@ -1,0 +1,16 @@
+{
+  "id": "WB-00917",
+  "title": "Possible Cobalt Strike beacon",
+  "severity": "high",
+  "host": "WS-FIN-042",
+  "user": "CORP\\j.alvarez",
+  "process": {
+    "name": "rundll32.exe",
+    "cmdline": "rundll32.exe C:\\Users\\j.alvarez\\AppData\\Local\\Temp\\upd.dll,StartW",
+    "parent": "winword.exe",
+    "sha256": "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f"
+  },
+  "network": [
+    {"src_ip": "10.20.4.42", "dst_ip": "185.220.101.45", "dst_port": 443, "sni": "cdn-update-check[.]xyz"}
+  ]
+}

@@ -1,0 +1,4 @@
+EDR alert: PsExec used for remote execution
+Host: SRV-APP-07   User: CORP\svc_patching
+Command: PsExec.exe \\SRV-APP-08 -s C:\Tools\patch_agent.exe /install
+Scheduled change CHG-44213 (monthly patching window, 02:00-04:00). Signed by Microsoft Corporation (Sysinternals).
