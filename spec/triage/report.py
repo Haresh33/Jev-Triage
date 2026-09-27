@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from .ioc import defang
 from .pipeline import TriageResult
 
 _ICON = {"malicious": "🔴", "benign": "🟢", "needs_human": "🟡", "unsure": "🟡", "error": "⚪"}
@@ -56,8 +57,10 @@ def to_markdown(r: TriageResult, *, max_chars: int = 60000) -> str:
         tail.append(f"_Sources not used: {', '.join(unavailable)}_")
     tail.append("_Reply `/ask <question>` to put a question to Jev, `/note <context>` to add context, `/triage` to re-run._")
 
-    text = "\n".join(out)
-    table = "\n".join(rows)
+    # Defang before measuring: GitHub turns bare URLs, domains and emails into clickable links, and "[.]" adds length.
+    text = defang("\n".join(out))
+    table = defang("\n".join(rows))
+    tail = [defang(t) for t in tail]
     if len(text) + len(table) > max_chars:  # GitHub comments max out at 65,536 characters
         table = table[: max(0, max_chars - len(text) - 200)] + "\n\n…(truncated; full log in the run artifact)\n\n</details>"
     return "\n".join([text, table, "", *tail])
