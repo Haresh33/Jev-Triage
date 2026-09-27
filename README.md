@@ -33,6 +33,28 @@ The ticket UI shows domain chips, an "Explanations Jev weighed" panel with proba
 bars, a "Behaviours observed" section with ATT&CK techniques and matching commands,
 unresolved ("not stated") evidence, and the decision trail.
 
+## Screenshots
+
+**Open a case** — paste alert text/JSON, pick an example, or upload a file (ZIPs supported).
+
+![Open a case](docs/screenshots/01-open-case.png)
+
+**Investigating** — the case runs in the background while Jev enriches evidence.
+
+![Investigating](docs/screenshots/02-investigating.png)
+
+**Verdict** — disposition, Jev's malicious probability, severity, category, ticket summary and the explanations Jev weighed.
+
+![Verdict](docs/screenshots/03-verdict.png)
+
+**Indicators** — outside context per indicator (Shodan, AbuseIPDB, VirusTotal, DNS, RDAP) with guardrail signals.
+
+![Indicators](docs/screenshots/04-indicators.png)
+
+**Decision trail** — every typed question Jev was asked, with its answer and confidence.
+
+![Decision trail](docs/screenshots/05-decision-trail.png)
+
 ## Layout
 
 - `server/src/` — triage engine (`triage.ts`), behaviour analyser (`behavior.ts`),
