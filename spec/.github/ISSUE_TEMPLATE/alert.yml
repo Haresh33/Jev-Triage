@@ -1,0 +1,33 @@
+name: Security alert
+description: Paste an alert and Jev investigates it until it has an answer.
+title: "[alert] "
+labels: ["alert"]
+body:
+  - type: textarea
+    id: alert
+    attributes:
+      label: Alert
+      description: Paste the alert as JSON or plain text. Defanged indicators (hxxp, [.]) are fine.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      options:
+        - Trend Micro Vision One
+        - IBM QRadar
+        - Microsoft Sentinel / Defender
+        - User-reported email
+        - Other
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: "Optional. Anything Jev should take into account, e.g. 'user is travelling in Spain this week' or 'change CHG-4421 approved'."
+  - type: textarea
+    id: questions
+    attributes:
+      label: Questions for Jev
+      description: "Optional, one per line. Yes/no questions, or pick-one with options in brackets: Which stage? [blocked | executed | spreading]"
