@@ -76,6 +76,49 @@ def refang(text: str) -> str:
     return text
 
 
+# ---------------------------------------------------------------- display-only defanging
+# Endings that are file types rather than internet domains. Endings that are both (.zip, .mov, .app) are
+# deliberately absent: GitHub and phones would link them, so they get defanged.
+_DISPLAY_FILE_ENDINGS = frozenset((
+    "exe dll sys drv ocx cpl scr msi lnk ps1 psm1 psd1 bat cmd vbs vbe js jse wsf wsh hta jar py pyc sh bash "
+    "php asp aspx jsp html htm xml xsl sct inf ini cfg conf config yaml yml json txt log csv tsv dat db sqlite "
+    "tmp bak old reg hive evtx etl pem crt cer pfx key pub gz tgz tar rar 7z cab iso img vhd vhdx dmg pkg deb rpm "
+    "pdf doc docx docm dot dotm xls xlsx xlsm ppt pptx pptm rtf one msg eml png jpg jpeg gif bmp svg webp ico "
+    "mp3 mp4 wav avi mkv so dylib ko plist kext o a lib class war ear nupkg whl gem lock md rst c cpp h cs go rb rs "
+    "local internal corp lan home localdomain").split())
+_DF_URL_RE = re.compile(r"\b[hH](ttps?)(://)([^\s<>\"'`]+)")
+_DF_EMAIL_RE = re.compile(r"\b([a-z0-9._%+-]+)@((?:[a-z0-9-]+\.)+[a-z]{2,24})\b", re.I)
+_DF_IPV4_RE = re.compile(r"\b(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|1?\d?\d)){3}\b")
+_DF_DOMAIN_RE = re.compile(r"\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+([a-z][a-z0-9-]{1,23})\b", re.I)
+
+
+def defang(text: str | None) -> str:
+    """Display-only defanging so GitHub, chat apps and phones never turn indicators into clickable links.
+
+    https://evil.com/a.zip -> hxxps://evil[.]com/a[.]zip, 185.220.101.45 -> 185[.]220[.]101[.]45,
+    user@corp.com -> user[@]corp[.]com. File names (powershell.exe), versions (4.0.30319), ATT&CK IDs
+    (T1003.002) and scores are left alone. The inverse is :func:`refang`; stored values are never changed.
+    """
+    if not text:
+        return text or ""
+    s = str(text)
+    s = _DF_URL_RE.sub(lambda m: f"hxx{m.group(1)[2:]}{m.group(2)}{m.group(3).replace('.', '[.]')}", s)
+    s = _DF_EMAIL_RE.sub(lambda m: f"{m.group(1)}[@]{m.group(2).replace('.', '[.]')}", s)
+    s = _DF_IPV4_RE.sub(lambda m: m.group(0).replace(".", "[.]"), s)
+
+    def _domain(m: re.Match[str]) -> str:
+        match, ending = m.group(0), m.group(1)
+        if ending.lower() in _DISPLAY_FILE_ENDINGS:
+            return match
+        if m.start() > 0 and s[m.start() - 1] == "[" or s[m.end():m.end() + 1] == "]":
+            return match
+        if re.fullmatch(r"v?\d+(\.\d+)*", match, re.I):
+            return match
+        return match.replace(".", "[.]")
+
+    return _DF_DOMAIN_RE.sub(_domain, s)
+
+
 def parse_alert(raw: str | bytes | dict | list) -> dict | list | str:
     """Accept a dict/list, a JSON string, or free text. Returns JSON when it parses, else the text."""
     if isinstance(raw, (dict, list)):
