@@ -1,0 +1,20 @@
+# docker compose up -d   ->  http://localhost:3000
+services:
+  jev-triage:
+    build: .
+    image: jev-triage:latest
+    env_file: .env
+    environment:
+      # The container listens on all interfaces, but the port below is published on this machine only.
+      # To share it on a network, set AUTH_USER / AUTH_PASSWORD in .env, remove ALLOW_NO_AUTH,
+      # and change the port mapping to "3000:3000" (ideally behind an HTTPS reverse proxy).
+      # If you reach it by a name other than localhost, add that name to ALLOWED_HOSTS in .env.
+      ALLOW_NO_AUTH: "true"
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - jev-triage-data:/data
+    restart: unless-stopped
+
+volumes:
+  jev-triage-data:

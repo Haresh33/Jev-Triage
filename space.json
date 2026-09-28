@@ -1,8 +1,0 @@
-{
-  "entry": "client/dist/index.html",
-  "managedCronJobs": [],
-  "name": "Jev Triage",
-  "platformVersion": 22,
-  "runtime": "typescript",
-  "slug": "jev-triage"
-}

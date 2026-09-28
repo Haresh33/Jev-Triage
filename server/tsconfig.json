@@ -3,12 +3,8 @@
   "compilerOptions": {
     "lib": ["ES2022"],
     "types": ["bun-types"],
-    "outDir": "./dist",
-    "rootDir": ".",
-    "tsBuildInfoFile": "./.tsbuildinfo.server",
-    "paths": {
-      "@space/privileged": ["./.generated/privileged.contract"]
-    }
+    "rootDir": "..",
+    "tsBuildInfoFile": "./.tsbuildinfo.server"
   },
-  "include": ["src/**/*", ".generated/**/*"]
+  "include": ["src/**/*", "../tests/**/*", "../scripts/**/*"]
 }
