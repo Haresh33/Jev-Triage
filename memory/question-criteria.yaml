@@ -1,0 +1,13 @@
+# What "yes" and "no" mean for specific yes/no questions. Sent to Jev with the question to make answers more precise.
+# Keys are question ids (they appear in the case's decision trail and in `bun run eval` reports).
+#
+# Example:
+#
+# criteria:
+#   proc_download:
+#     yes: "The command line itself retrieves content from an address outside the organisation (http, https, ftp or a UNC path)."
+#     no: "The command only works with local files or internal addresses, or no command line is present."
+#     added_by: j.doe
+#     added_on: 2026-09-28
+
+criteria: {}

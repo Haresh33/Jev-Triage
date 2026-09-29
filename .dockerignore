@@ -1,0 +1,17 @@
+node_modules
+data
+.env
+.env.*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+spec
+docs
+tests
+.git
+*.tsbuildinfo
+.tsbuildinfo.*
+eval/reports
+eval/lookup-cache.json
+memory/proposals

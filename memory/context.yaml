@@ -1,0 +1,39 @@
+# Organisation context: what your team knows that a single alert doesn't show.
+#
+# Only entries that match a case (by user, host, IP, domain, hash, command or detection name) are shown to Jev,
+# labelled as coming from your team. Context explains activity; it never clears the guardrail on its own.
+#
+# Add entries by hand, or approve proposals from `bun run review` with `bun run memory approve`.
+# Every entry records who added it and when. Use `expires` for anything temporary (change windows, projects).
+#
+# kind:   account | host | ip | domain | hash | tool | detection
+# match:  values to match. account: "CORP\svc_patching", "svc_patching" or a UPN. ip: an address or CIDR
+#         (10.20.9.0/24). domain: matches subdomains too. tool: text found in a command line (4+ characters).
+#         detection: text found in the alert title / detection name.
+# note:   the one sentence Jev sees. Say what is normal, not "this is safe".
+#
+# Examples (remove the leading "# " to use):
+#
+# entries:
+#   - id: acct-svc-patching
+#     kind: account
+#     match: ["CORP\\svc_patching"]
+#     note: "svc_patching is the patch automation service account; it runs PsExec to servers during the monthly patch window."
+#     added_by: j.doe
+#     added_on: 2026-09-28
+#     source: CHG-44213
+#   - id: scanner-nessus
+#     kind: ip
+#     match: ["10.20.4.15"]
+#     note: "10.20.4.15 is the Nessus vulnerability scanner; it scans all subnets nightly between 01:00 and 04:00."
+#     added_by: j.doe
+#     added_on: 2026-09-28
+#   - id: change-window-oct
+#     kind: host
+#     match: ["SRV-APP-07", "SRV-APP-08"]
+#     note: "SRV-APP-07 and -08 are being migrated by the platform team this month; expect remote administration."
+#     added_by: j.doe
+#     added_on: 2026-09-28
+#     expires: 2026-10-31
+
+entries: []

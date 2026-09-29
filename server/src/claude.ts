@@ -1,5 +1,4 @@
-import type { Ctx } from "@hatch/space-sdk";
-import { privileged } from "@space/privileged";
+import type { Ctx } from "./platform";
 import type { Finding, TriageResult, Verdict } from "./triage";
 
 export type ClaudeQuestionSet = {
@@ -12,7 +11,7 @@ export type ClaudeTiebreak = {
   rationale: string;
 };
 
-type ClaudeMode = "questions" | "tiebreak";
+type ClaudeMode = "questions" | "tiebreak" | "audit";
 
 type ClaudeResponse = {
   questions?: unknown;
@@ -71,6 +70,9 @@ function fullCaseState(result: TriageResult, compact = false): Record<string, un
     })),
     jevAnswers: result.findings.slice(compact ? -50 : -150).map(compactFinding),
     analystNotes: result.state.notes.slice(compact ? -8 : -20),
+    ...(result.orgContext?.length ? { organisationContext: { about: "Reviewed context from the organisation's security team: what is normal, not proof this activity was authorised.", entries: result.orgContext.map((c) => c.note) } } : {}),
+    ...(result.logSearches?.length ? { surroundingLogs: result.logSearches.map((v) => ({ search: v.label, sources: v.sources, events: v.events, findings: v.findings, failed: v.errors })) } : {}),
+    ...(result.relatedCases?.length ? { relatedCases: result.relatedCases.map((r) => ({ daysAgo: r.daysAgo, alert: r.title, shares: r.shared, outcome: r.outcome, analystReason: r.reason })) } : {}),
     unresolved: result.unresolved,
     decisionTrail: {
       rounds: result.rounds,
@@ -95,7 +97,7 @@ function fullCaseState(result: TriageResult, compact = false): Record<string, un
 async function callClaude(ctx: Ctx, mode: ClaudeMode, result: TriageResult): Promise<ClaudeResponse> {
   let stateJson = JSON.stringify(fullCaseState(result));
   if (stateJson.length > 79_000) stateJson = JSON.stringify(fullCaseState(result, true));
-  const response = await ctx.executePrivileged(privileged.claudeComplete, { mode, stateJson });
+  const response = await ctx.services.aiComplete({ mode, stateJson });
   if (!response.ok) throw new Error(response.error ?? "Claude could not complete this step.");
   const parsed = parseResponse(response.dataJson);
   if (!parsed) throw new Error("Claude returned an unreadable response.");
@@ -110,8 +112,8 @@ export async function writeClaudeQuestions(ctx: Ctx, result: TriageResult): Prom
   return { questions: [...new Set(questions)] };
 }
 
-export async function getClaudeTiebreak(ctx: Ctx, result: TriageResult): Promise<ClaudeTiebreak> {
-  const raw = await callClaude(ctx, "tiebreak", result);
+export async function getClaudeTiebreak(ctx: Ctx, result: TriageResult, mode: "tiebreak" | "audit" = "tiebreak"): Promise<ClaudeTiebreak> {
+  const raw = await callClaude(ctx, mode, result);
   if (raw.verdict !== "malicious" && raw.verdict !== "benign" && raw.verdict !== "needs_human") throw new Error("Claude did not return a usable verdict.");
   const verdict = raw.verdict;
   const summary = typeof raw.summary === "string" ? raw.summary.trim().slice(0, 2000) : "";

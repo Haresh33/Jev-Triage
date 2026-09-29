@@ -39,3 +39,13 @@ Thumbs.db
 # Any env variant except the documented example
 .env.*
 !.env.example
+
+# Local data directory (database, temporary uploads)
+data/
+
+# Cold-loop proposals can quote alert data
+memory/proposals/*
+!memory/proposals/README.md
+# Evaluation reports can quote alert data
+eval/reports/
+eval/lookup-cache.json
